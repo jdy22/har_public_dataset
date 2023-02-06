@@ -14,7 +14,7 @@ else:
 
 print(device)
 
-logfile = open("../logs/LSTM_test1.txt", "w")
+logfile = open("LSTM_test1.txt", "w")
 
 # Constants/parameters
 window_size = 1000 # Used in pre-processing
