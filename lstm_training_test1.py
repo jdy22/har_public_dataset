@@ -121,14 +121,16 @@ for n_epoch in range(n_epochs):
             print(f"{i} batches processed")
         optimiser.zero_grad()
         outputs = model(inputs)
+        labels = torch.argmax(labels, dim=1)
         loss = loss_function(outputs, labels)
         loss.backward()
         optimiser.step()
         
     with torch.no_grad():
         predictions = model(x_test_tensor)
-        test_loss = loss_function(predictions, y_test_tensor)
-        accuracy = torch.count_nonzero(torch.argmax(predictions, dim=1)==torch.argmax(y_test_tensor, dim=1))/len(predictions)
+        labels = torch.argmax(y_test_tensor, dim=1)
+        test_loss = loss_function(predictions, labels)
+        accuracy = torch.count_nonzero(torch.argmax(predictions, dim=1)==labels)/len(predictions)
         print(f"Model loss after {n_epoch+1} epochs = {test_loss}, accuracy = {accuracy}")
         logfile.write(f"Model loss after {n_epoch+1} epochs = {test_loss}, accuracy = {accuracy}")
         
