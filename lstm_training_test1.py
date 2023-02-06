@@ -72,6 +72,9 @@ class LSTMModel(nn.Module):
         # Initialize cell state
         c0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).requires_grad_()
 
+        h0 = h0.to(device=device)
+        c0 = c0.to(device=device)
+
         out, (hn, cn) = self.lstm(x, (h0.detach(), c0.detach()))
 
         # out.size() --> batch_size, seq_dim, hidden_dim
