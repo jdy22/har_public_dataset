@@ -11,7 +11,7 @@ Notes:
 
 
 To run using school GPUs:
-1. Download VPN and connect:
+1. Download VPN and connect
 Follow instructions here
 https: // www. imperial. ac. uk/ admin-services/ ict/ self-service/ connect-communicate/ remote-access/ virtual-private-network-vpn/ 
 
@@ -25,3 +25,12 @@ https: // www. imperial. ac. uk/ admin-services/ ict/ self-service/ connect-comm
 > screen -ls                 # to list the ongoing sessions
 > screen -r <sessionname>    # to reattach back to the session
 > exit                       # to close the session completely
+
+4. Create venv to start running your code
+> python3 -m venv venv       # create your virtual env
+> venv/bin/activate          # activate your virtual env
+> git clone git@gitlab.doc.ic.ac.uk:g22mai03/har_initial_test.git   #Git clone our repository
+# run whatever you need to (see SN5 for access of data)
+
+5. Accessing the pre-processed input_files data set (Jo has helped to load it into our VM alrd, so no need to re-download)
+Change the path in your own code to "/home/joanna/har_initial_test/input_files" to access the files
