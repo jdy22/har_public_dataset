@@ -14,15 +14,21 @@ else:
 
 print(device)
 
+logfile = open("logs/LSTM_test1.txt", "w")
+
 # Constants/parameters
 window_size = 1000 # Used in pre-processing
 batch_size = 200 # Used for training
 learning_rate = 0.0001
-n_epochs = 5 # Training epochs - set to a low number for now 
+n_epochs = 20 # Training epochs - set to a low number for now 
 input_dim = 90
 hidden_dim = 200
 layer_dim = 1
-output_dim = 3 # For now - only looking at bed and fall activities
+output_dim = 8 
+
+logfile.write(f"Window size: {window_size}, batch size: {batch_size}, learning rate: {learning_rate}, epochs: {n_epochs}\n")
+logfile.write(f"Input dimension: {input_dim}, hidden dimension: {hidden_dim}, layer dimension: {layer_dim}, output dimension: {output_dim}\n")
+logfile.write("\n")
 
 # Read in data
 print("Reading in data and converting to tensors...")
@@ -119,5 +125,10 @@ for n_epoch in range(n_epochs):
     with torch.no_grad():
         predictions = model(x_test_tensor)
         test_loss = loss_function(predictions, y_test_tensor)
-        print(f"Model loss after {n_epoch+1} epochs = {test_loss}")
+        accuracy = torch.count_nonzero(torch.argmax(predictions, dim=1)==torch.argmax(y_test_tensor, dim=1))/len(predictions)
+        print(f"Model loss after {n_epoch+1} epochs = {test_loss}, accuracy = {accuracy}")
+        logfile.write(f"Model loss after {n_epoch+1} epochs = {test_loss}, accuracy = {accuracy}")
+        
+
+logfile.close()
 
