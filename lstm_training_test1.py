@@ -5,6 +5,15 @@ import torch.nn as nn
 from torch.autograd import Variable
 from torch.utils.data import DataLoader, Dataset
 
+USE_GPU = True
+
+if USE_GPU and torch.cuda.is_available():
+    device = torch.device('cuda:0')
+else:
+    device = torch.device('cpu')
+
+print(device)
+
 # Constants/parameters
 window_size = 1000 # Used in pre-processing
 batch_size = 200 # Used for training
@@ -95,6 +104,7 @@ train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size)
 
 # Train model
 print("Training model...")
+model = model.to(device=device)
 for n_epoch in range(n_epochs):
     print(f"Starting epoch number {n_epoch+1}")
     for i, (inputs, labels) in enumerate(train_loader):
