@@ -54,6 +54,7 @@ print("Creating LSTM model, loss function and optimiser...")
 # LSTM model class
 class LSTMModel(nn.Module):
     def __init__(self, input_dim, hidden_dim, layer_dim, output_dim):
+    # def __init__(self, input_dim, hidden_dim, layer_dim, output_dim, batch_first=True, bidirectional=True): #TODO
         super(LSTMModel, self).__init__()
         # Number of hidden units
         self.hidden_dim = hidden_dim
@@ -62,10 +63,25 @@ class LSTMModel(nn.Module):
 
         # batch_first=True means that input tensor will be of shape (batch_dim, seq_dim, feature_dim)
         self.lstm = nn.LSTM(input_dim, hidden_dim, layer_dim, batch_first=True)
+        # self.lstm = nn.LSTM(input_dim, hidden_dim, layer_dim, batch_first=True, bidirectional=True) #TODO
+
+        # # attention layer #TODO
+        # self.batch_first = batch_first
+        # self.bidirectional = bidirectional
+        #
+        # self.attention = nn.Linear(input_dim*(self.bidirectional+1)*hidden_dim, input_dim)
+        # # should the output dim be input_dim, where a single value will multiply with the whole vector?
+        # # or should be 1-1 multiplication?
 
         # Output layer (linear combination of last outputs)
         self.fc = nn.Linear(hidden_dim, output_dim)
+        # self.fc = nn.Linear(hidden_dim*self.D, output_dim) #TODO
 
+
+
+        # bidirectional can be added thru adding to line 64 init params - "bidirectional=True"
+        # LSTM module alrd concat the outputs throughout the seq for us,
+        # The outputs of the two directions of the LSTM are concatenated on the last dimension.
     def forward(self, x):
         # Initialize hidden state with zeros
         h0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).requires_grad_()
@@ -79,6 +95,17 @@ class LSTMModel(nn.Module):
 
         # out.size() --> batch_size, seq_dim, hidden_dim
         # out[:, -1, :] --> batch_size, hidden_dim --> extract outputs from last layer
+
+        # TODO need to check on dimensions and sort out the form of the weights & to incorporate requires_grad_()?
+        # if not self.batch_first:
+        #     out_atten = torch.transpose(out, 0, 1)
+        #
+        # out_atten = torch.flatten(out_atten, start_dim=1, end_dim=-1)
+        # out_atten = self.attention(out_atten)
+        # activation = nn.Softmax(dim=1)
+        # out_atten = activation(out_atten)
+        # out = torch.multiply(out, out_atten)
+
         out = self.fc(out[:, -1, :]) 
         # out.size() --> batch_size, output_dim
 
@@ -88,7 +115,7 @@ class LSTMModel(nn.Module):
 
         return out
 
-model = LSTMModel(input_dim, hidden_dim, layer_dim, output_dim)
+model = LSTMModel(input_dim, hidden_dim, layer_dim, output_dim) #TODO bidrectional=True, model = biLSTM
 loss_function = nn.CrossEntropyLoss()
 optimiser = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
