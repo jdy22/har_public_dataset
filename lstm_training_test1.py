@@ -40,9 +40,9 @@ y_train = data[2]
 y_test = data[3]
 
 # Convert to torch tensors, move to GPU and reshape x into sequential data (3D)
-x_train_tensor = Variable(torch.Tensor(x_train)).to(device=device)
+x_train_tensor = Variable(torch.Tensor(x_train))
 x_test_tensor = Variable(torch.Tensor(x_test)).to(device=device)
-y_train_tensor = Variable(torch.Tensor(y_train)).to(device=device)
+y_train_tensor = Variable(torch.Tensor(y_train))
 y_test_tensor = Variable(torch.Tensor(y_test)).to(device=device)
 
 x_train_tensor = torch.reshape(x_train_tensor, (x_train_tensor.shape[0], window_size, -1))
@@ -146,6 +146,8 @@ for n_epoch in range(n_epochs):
     for i, (inputs, labels) in enumerate(train_loader):
         if i%10 == 0:
             print(f"{i} batches processed")
+        inputs = inputs.to(device=device)
+        labels = labels.to(device=device)
         optimiser.zero_grad()
         outputs = model(inputs)
         labels = torch.argmax(labels, dim=1)
