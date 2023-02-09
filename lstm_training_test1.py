@@ -136,7 +136,7 @@ class Dataset_builder(Dataset):
         return self.len
 
 train_dataset = Dataset_builder(x_train_tensor, y_train_tensor)
-train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size)
+train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, num_workers=2)
 
 # Train model
 print("Training model...")
