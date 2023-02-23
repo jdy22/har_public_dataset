@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 from torch.utils.data import DataLoader, Dataset
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 USE_GPU = True
 
@@ -20,7 +21,7 @@ logfile = open("LSTM_test3.txt", "w")
 window_size = 1000 # Used in pre-processing
 batch_size = 200 # Used for training
 learning_rate = 0.0001
-n_epochs = 40 # Training epochs
+n_epochs = 50 # Training epochs
 input_dim = 90
 hidden_dim = 200
 layer_dim = 1
@@ -162,7 +163,14 @@ for n_epoch in range(n_epochs):
         accuracy = torch.count_nonzero(torch.argmax(predictions, dim=1)==labels)/len(predictions)
         print(f"Model loss after {n_epoch+1} epochs = {test_loss}, accuracy = {accuracy}")
         logfile.write(f"Model loss after {n_epoch+1} epochs = {test_loss}, accuracy = {accuracy}\n")
-        
 
+cm_labels = ["bed", "fall", "walk", "pickup", "run", "sitdown", "standup"]
+cm = confusion_matrix(labels.cpu(), torch.argmax(predictions, dim=1).cpu(), normalize="true")
+print("Confusion matrix:")
+print(cm)
+logfile.write(f"\nFinal confusion matrix:\n")
+for i in range(len(cm)):
+    logfile.write(str(cm[i]))
+        
 logfile.close()
 
