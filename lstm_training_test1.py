@@ -14,17 +14,17 @@ else:
 
 print(device)
 
-logfile = open("LSTM_test1.txt", "w")
+logfile = open("LSTM_test3.txt", "w")
 
 # Constants/parameters
 window_size = 1000 # Used in pre-processing
 batch_size = 200 # Used for training
 learning_rate = 0.0001
-n_epochs = 20 # Training epochs - set to a low number for now 
+n_epochs = 40 # Training epochs
 input_dim = 90
 hidden_dim = 200
 layer_dim = 1
-output_dim = 8 
+output_dim = 7
 
 logfile.write(f"Window size: {window_size}, batch size: {batch_size}, learning rate: {learning_rate}, epochs: {n_epochs}\n")
 logfile.write(f"Input dimension: {input_dim}, hidden dimension: {hidden_dim}, layer dimension: {layer_dim}, output dimension: {output_dim}\n")
@@ -32,7 +32,7 @@ logfile.write("\n")
 
 # Read in data
 print("Reading in data and converting to tensors...")
-with open("data_test1.pk1", "rb") as file:
+with open("data_test2.pk1", "rb") as file:
     data = pickle.load(file)
 x_train = data[0]
 x_test = data[1]
@@ -144,8 +144,8 @@ model = model.to(device=device)
 for n_epoch in range(n_epochs):
     print(f"Starting epoch number {n_epoch+1}")
     for i, (inputs, labels) in enumerate(train_loader):
-        if i%10 == 0:
-            print(f"{i} batches processed")
+        # if i%10 == 0:
+        #     print(f"{i} batches processed")
         inputs = inputs.to(device=device)
         labels = labels.to(device=device)
         optimiser.zero_grad()
@@ -161,7 +161,7 @@ for n_epoch in range(n_epochs):
         test_loss = loss_function(predictions, labels)
         accuracy = torch.count_nonzero(torch.argmax(predictions, dim=1)==labels)/len(predictions)
         print(f"Model loss after {n_epoch+1} epochs = {test_loss}, accuracy = {accuracy}")
-        logfile.write(f"Model loss after {n_epoch+1} epochs = {test_loss}, accuracy = {accuracy}")
+        logfile.write(f"Model loss after {n_epoch+1} epochs = {test_loss}, accuracy = {accuracy}\n")
         
 
 logfile.close()
