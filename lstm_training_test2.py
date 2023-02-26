@@ -16,17 +16,19 @@ else:
 print(device)
 # torch.cuda.empty_cache()
 
-logfile = open("LSTM_test4.txt", "w")
+logfile = open("LSTM_test6.txt", "w")
 
 # Constants/parameters
 window_size = 1000 # Used in pre-processing
-batch_size = 10 # Used for training
+batch_size = 50 # Used for training
 learning_rate = 0.0001
-n_epochs = 50 # Training epochs
+n_epochs = 80 # Training epochs
 input_dim = 90
-hidden_dim = 200
+hidden_dim = 50
 layer_dim = 1
 output_dim = 7
+
+logfile.write("Bi-LSTM no Attention\n")
 
 logfile.write(f"Window size: {window_size}, batch size: {batch_size}, learning rate: {learning_rate}, epochs: {n_epochs}\n")
 logfile.write(f"Input dimension: {input_dim}, hidden dimension: {hidden_dim}, layer dimension: {layer_dim}, output dimension: {output_dim}\n")
@@ -56,7 +58,7 @@ print("Creating LSTM model, loss function and optimiser...")
 # LSTM model class
 class LSTMModel(nn.Module):
     # def __init__(self, input_dim, hidden_dim, layer_dim, output_dim):
-    def __init__(self, input_dim, hidden_dim, layer_dim, output_dim, batch_first=True, bidirectional=True): 
+    def __init__(self, input_dim, hidden_dim, layer_dim, output_dim, batch_first=True, bidirectional=True, use_attention=True): 
         super(LSTMModel, self).__init__()
         # Number of hidden units
         self.hidden_dim = hidden_dim
@@ -70,15 +72,19 @@ class LSTMModel(nn.Module):
         
         self.batch_first = batch_first
 
-        # attention layer #TODO
+        # bidirectional
         self.bidirectional = bidirectional
         if self.bidirectional:
             self.D = 2
         else:
             self.D = 1
-        
-        self.attention = nn.Linear(window_size*(self.D)*hidden_dim, window_size, bias=True,device=device) 
-        # see eqn 3,4,5 in the paper
+
+        # attention layer 
+        self.use_attention = use_attention
+
+        if self.use_attention:
+            self.attention = nn.Linear(window_size*(self.D)*hidden_dim, window_size, bias=True,device=device) 
+            # see eqn 3,4,5 in the paper
 
         # Output layer (linear combination of last outputs)
         self.fc = nn.Linear(window_size*(self.D)*hidden_dim, output_dim)
@@ -106,16 +112,14 @@ class LSTMModel(nn.Module):
         # if not self.batch_first:
         #     out_atten = torch.transpose(out, 0, 1)
         #
-        softmax = nn.Softmax(dim=-1)
-        relu = nn.ReLU()
-
-        attention = softmax(relu(self.attention(out.flatten(start_dim=1,end_dim=-1)))) # attention
-        attention = attention.unsqueeze(-1)
-        attention = attention.repeat(1,1,hidden_dim*self.D) # repeat for each hidden dim
-        out = torch.mul(attention, out) #merge
-        out = out.flatten(start_dim=1,end_dim=-1) #flatten layer
-        # print(out.shape)
-        
+        if self.use_attention:
+            softmax = nn.Softmax(dim=-1)
+            relu = nn.ReLU()
+            attention = softmax(relu(self.attention(out.flatten(start_dim=1,end_dim=-1)))) # attention
+            attention = attention.unsqueeze(-1)
+            attention = attention.repeat(1,1,hidden_dim*self.D) # repeat for each hidden dim
+            out = torch.mul(attention, out) #merge
+        out = out.flatten(start_dim=1,end_dim=-1) #flatten layer        
         out = self.fc(out) 
 
         # Apply softmax activation to output
@@ -124,7 +128,7 @@ class LSTMModel(nn.Module):
 
         return out
 
-model = LSTMModel(input_dim, hidden_dim, layer_dim, output_dim) #TODO bidrectional=True, model = biLSTM
+model = LSTMModel(input_dim, hidden_dim, layer_dim, output_dim, use_attention=False) 
 loss_function = nn.CrossEntropyLoss()
 optimiser = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
@@ -178,7 +182,7 @@ print("Confusion matrix:")
 print(cm)
 logfile.write(f"\nFinal confusion matrix:\n")
 for i in range(len(cm)):
-    logfile.write(str(cm[i]))
+    logfile.write(f"{str(cm[i])}\n")
         
 logfile.close()
 
