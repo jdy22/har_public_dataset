@@ -15,25 +15,30 @@ else:
 
 print(device)
 
-logfile = open("LSTM_test3.txt", "w")
+logging = True
+logfile_name = "LSTM_test12.txt"
+
+if logging:
+    logfile = open(logfile_name, "w")
 
 # Constants/parameters
 window_size = 1000 # Used in pre-processing
-batch_size = 200 # Used for training
+batch_size = 20 # Used for training
 learning_rate = 0.0001
-n_epochs = 50 # Training epochs
+n_epochs = 100 # Training epochs
 input_dim = 90
-hidden_dim = 200
+hidden_dim = 300
 layer_dim = 1
 output_dim = 7
 
-logfile.write(f"Window size: {window_size}, batch size: {batch_size}, learning rate: {learning_rate}, epochs: {n_epochs}\n")
-logfile.write(f"Input dimension: {input_dim}, hidden dimension: {hidden_dim}, layer dimension: {layer_dim}, output dimension: {output_dim}\n")
-logfile.write("\n")
+if logging:
+    logfile.write(f"Window size: {window_size}, batch size: {batch_size}, learning rate: {learning_rate}, epochs: {n_epochs}\n")
+    logfile.write(f"Input dimension: {input_dim}, hidden dimension: {hidden_dim}, layer dimension: {layer_dim}, output dimension: {output_dim}\n")
+    logfile.write("\n")
 
 # Read in data
 print("Reading in data and converting to tensors...")
-with open("data_test2.pk1", "rb") as file:
+with open("data_test3.pk1", "rb") as file:
     data = pickle.load(file)
 x_train = data[0]
 x_test = data[1]
@@ -162,15 +167,22 @@ for n_epoch in range(n_epochs):
         test_loss = loss_function(predictions, labels)
         accuracy = torch.count_nonzero(torch.argmax(predictions, dim=1)==labels)/len(predictions)
         print(f"Model loss after {n_epoch+1} epochs = {test_loss}, accuracy = {accuracy}")
-        logfile.write(f"Model loss after {n_epoch+1} epochs = {test_loss}, accuracy = {accuracy}\n")
+        if logging:
+            logfile.write(f"Model loss after {n_epoch+1} epochs = {test_loss}, accuracy = {accuracy}\n")
 
 cm_labels = ["bed", "fall", "walk", "pickup", "run", "sitdown", "standup"]
 cm = confusion_matrix(labels.cpu(), torch.argmax(predictions, dim=1).cpu(), normalize="true")
 print("Confusion matrix:")
 print(cm)
-logfile.write(f"\nFinal confusion matrix:\n")
-for i in range(len(cm)):
-    logfile.write(str(cm[i]))
+
+output_labels, output_counts = torch.unique(torch.argmax(predictions, dim=1).cpu(), return_counts=True)
+print(output_labels)
+print(output_counts)
+
+if logging:
+    logfile.write(f"\nFinal confusion matrix:\n")
+    for i in range(len(cm)):
+        logfile.write(str(cm[i]))
         
-logfile.close()
+    logfile.close()
 

@@ -53,7 +53,7 @@ print(y_full.shape)
 
 # Split into training and testing data (80/20)
 print("Splitting data into training and test sets...")
-x_train, x_test, y_train, y_test = train_test_split(x_full, y_full, test_size=0.20, random_state=0)
+x_train, x_test, y_train, y_test = train_test_split(x_full, y_full, test_size=0.20, random_state=1000)
 
 # Write out data files
 print("Writing out data...")
@@ -62,7 +62,7 @@ print("Writing out data...")
 # np.savetxt("y_train_1.csv", y_train, delimiter=",")
 # np.savetxt("y_test_1.csv", y_test, delimiter=",")
 data = [x_train, x_test, y_train, y_test]
-with open("data_test2.pk1", "wb") as file:
+with open("data_test3.pk1", "wb") as file:
     pickle.dump(data, file)
 
 print("Done")

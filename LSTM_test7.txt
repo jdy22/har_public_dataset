@@ -1,0 +1,33 @@
+Window size: 1000, batch size: 200, learning rate: 0.001, epochs: 20
+Input dimension: 90, hidden dimension: 200, layer dimension: 1, output dimension: 7
+
+Model loss after 1 epochs = 1.7896292209625244, accuracy = 0.3758794069290161
+Model loss after 2 epochs = 1.7777880430221558, accuracy = 0.3778894543647766
+Model loss after 3 epochs = 1.7553808689117432, accuracy = 0.4125628173351288
+Model loss after 4 epochs = 1.7052091360092163, accuracy = 0.4889447093009949
+Model loss after 5 epochs = 1.6750108003616333, accuracy = 0.5427135825157166
+Model loss after 6 epochs = 1.6353716850280762, accuracy = 0.5798994898796082
+Model loss after 7 epochs = 1.6147760152816772, accuracy = 0.5914573073387146
+Model loss after 8 epochs = 1.5923606157302856, accuracy = 0.6045225858688354
+Model loss after 9 epochs = 1.588929295539856, accuracy = 0.6045225858688354
+Model loss after 10 epochs = 1.5714187622070312, accuracy = 0.6170853972434998
+Model loss after 11 epochs = 1.5632972717285156, accuracy = 0.6160804033279419
+Model loss after 12 epochs = 1.5622895956039429, accuracy = 0.6165829300880432
+Model loss after 13 epochs = 1.5544607639312744, accuracy = 0.6216080188751221
+Model loss after 14 epochs = 1.5537359714508057, accuracy = 0.6226130723953247
+Model loss after 15 epochs = 1.5621273517608643, accuracy = 0.6165829300880432
+Model loss after 16 epochs = 1.5546663999557495, accuracy = 0.6190954446792603
+Model loss after 17 epochs = 1.5520302057266235, accuracy = 0.6201004981994629
+Model loss after 18 epochs = 1.543084740638733, accuracy = 0.6281406879425049
+Model loss after 19 epochs = 1.5488067865371704, accuracy = 0.6195979714393616
+Model loss after 20 epochs = 1.5428533554077148, accuracy = 0.6286432147026062
+
+Final confusion matrix:
+[0.73417722 0.         0.17299578 0.05907173 0.03375527 0.
+ 0.        ][0.03448276 0.         0.52873563 0.01724138 0.41954023 0.
+ 0.        ][0.0066335  0.         0.99004975 0.         0.00331675 0.
+ 0.        ][0.0483871  0.         0.25806452 0.60215054 0.09139785 0.
+ 0.        ][0.00407332 0.         0.24643585 0.         0.74949084 0.
+ 0.        ][0.50909091 0.         0.25454545 0.03030303 0.20606061 0.
+ 0.        ][0.3358209  0.         0.3880597  0.02985075 0.24626866 0.
+ 0.        ]
