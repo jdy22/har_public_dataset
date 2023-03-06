@@ -16,14 +16,14 @@ else:
 print(device)
 
 logging = True
-logfile_name = "LSTM_test12.txt"
+logfile_name = "LSTM_test14.txt"
 
 if logging:
     logfile = open(logfile_name, "w")
 
 # Constants/parameters
 window_size = 1000 # Used in pre-processing
-batch_size = 20 # Used for training
+batch_size = 10 # Used for training
 learning_rate = 0.0001
 n_epochs = 100 # Training epochs
 input_dim = 90
