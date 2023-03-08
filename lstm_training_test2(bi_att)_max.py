@@ -16,27 +16,28 @@ else:
 print(device)
 # torch.cuda.empty_cache()
 
-logfile = open("LSTM_test6.txt", "w")
+logfile = open("BiLSTM_atten_test1.txt", "w")
 
 # Constants/parameters
-window_size = 1000 # Used in pre-processing
-batch_size = 50 # Used for training
+k = 4  #kernel size for av/max_pooling
+window_size = int(1000/k) # Used in pre-processing
+batch_size = 100 # Used for training
 learning_rate = 0.0001
-n_epochs = 80 # Training epochs
+n_epochs = 150 # Training epochs
 input_dim = 90
-hidden_dim = 50
+hidden_dim = 300
 layer_dim = 1
 output_dim = 7
 
-logfile.write("Bi-LSTM no Attention\n")
+logfile.write("Bi-LSTM with Attention (max_pooling)\n")
 
-logfile.write(f"Window size: {window_size}, batch size: {batch_size}, learning rate: {learning_rate}, epochs: {n_epochs}\n")
+logfile.write(f"K size: {k}, Window size: {window_size}, batch size: {batch_size}, learning rate: {learning_rate}, epochs: {n_epochs}\n")
 logfile.write(f"Input dimension: {input_dim}, hidden dimension: {hidden_dim}, layer dimension: {layer_dim}, output dimension: {output_dim}\n")
 logfile.write("\n")
 
 # Read in data
 print("Reading in data and converting to tensors...")
-with open("data_test2.pk1", "rb") as file:
+with open("data_test3.pk1", "rb") as file:
     data = pickle.load(file)
 x_train = data[0]
 x_test = data[1]
@@ -49,7 +50,19 @@ x_test_tensor = Variable(torch.Tensor(x_test)).to(device=device)
 y_train_tensor = Variable(torch.Tensor(y_train))
 y_test_tensor = Variable(torch.Tensor(y_test)).to(device=device)
 
+#incorporate av/max pooling
+
+max_pool = nn.MaxPool1d(kernel_size=k, stride=k)
+# avg_pool = nn.AvgPool1d(kernel_size=k, stride=k, count_include_pad=False)
+
+x_train_tensor = x_train_tensor.unsqueeze(1)
+x_train_tensor = max_pool(x_train_tensor)
+x_train_tensor = x_train_tensor.squeeze(1)
 x_train_tensor = torch.reshape(x_train_tensor, (x_train_tensor.shape[0], window_size, -1))
+
+x_test_tensor = x_test_tensor.unsqueeze(1)
+x_test_tensor = max_pool(x_test_tensor)
+x_test_tensor = x_test_tensor.squeeze(1)
 x_test_tensor = torch.reshape(x_test_tensor, (x_test_tensor.shape[0], window_size, -1))
 
 # Instantiate LSTM model and loss function
@@ -65,11 +78,8 @@ class LSTMModel(nn.Module):
         # Number of hidden layers
         self.layer_dim = layer_dim
 
-        # batch_first=True means that input tensor will be of shape (batch_dim, seq_dim, feature_dim)
-        # self.lstm = nn.LSTM(input_dim, hidden_dim, layer_dim, batch_first=True)
-        self.lstm = nn.LSTM(input_dim, hidden_dim, layer_dim, batch_first=True, bidirectional=True) #TODO
-
         
+        self.lstm = nn.LSTM(input_dim, hidden_dim, layer_dim, batch_first=True, bidirectional=True) 
         self.batch_first = batch_first
 
         # bidirectional
@@ -102,7 +112,6 @@ class LSTMModel(nn.Module):
 
         h0 = h0.to(device=device)
         c0 = c0.to(device=device)
-
         out, (hn, cn) = self.lstm(x, (h0.detach(), c0.detach()))
 
         # out.size() --> batch_size, seq_dim, hidden_dim
@@ -171,6 +180,8 @@ for n_epoch in range(n_epochs):
     with torch.no_grad():
         predictions = model(x_test_tensor)
         labels = torch.argmax(y_test_tensor, dim=1)
+        # print(predictions.shape)
+        # print(labels.shape)
         test_loss = loss_function(predictions, labels)
         accuracy = torch.count_nonzero(torch.argmax(predictions, dim=1)==labels)/len(predictions)
         print(f"Model loss after {n_epoch+1} epochs = {test_loss}, accuracy = {accuracy}")

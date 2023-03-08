@@ -1,0 +1,6 @@
+Bi-LSTM with Attention (av_pooling)
+K size: 4, Window size: 250, batch size: 20, learning rate: 0.0001, epochs: 150
+Input dimension: 90, hidden dimension: 300, layer dimension: 1, output dimension: 7
+
+Model loss after 1 epochs = 1.7371577024459839, accuracy = 0.42412060499191284
+Model loss after 2 epochs = 1.7447476387023926, accuracy = 0.4170854091644287
