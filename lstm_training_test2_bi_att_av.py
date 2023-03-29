@@ -16,22 +16,23 @@ else:
 print(device)
 # torch.cuda.empty_cache()
 
-logfile = open("BiLSTM_atten_test999txt", "w")
+logfile = open("BiLSTM_atten_test001txt", "w")
 
 # Constants/parameters
-k = 4  #kernel size for av/max_pooling
+k = 2  #kernel size for av polling before lstm
+k_2 = 4 # kernel size & stride for av pooling before attention
 window_size = int(1000/k) # Used in pre-processing
 batch_size = 20 # Used for training
 learning_rate = 0.0001
 n_epochs = 150 # Training epochs
 input_dim = 90
-hidden_dim = 300
+hidden_dim = 200
 layer_dim = 1
 output_dim = 7
 
 logfile.write("Bi-LSTM with Attention (av_pooling)\n")
 
-logfile.write(f"K size: {k}, Window size: {window_size}, batch size: {batch_size}, learning rate: {learning_rate}, epochs: {n_epochs}\n")
+logfile.write(f"K size: k:{k} and k_2{k_2}, Window sizes: before LSTM:{window_size} and before atten:{int(window_size/k_2)}, batch size: {batch_size}, learning rate: {learning_rate}, epochs: {n_epochs}\n")
 logfile.write(f"Input dimension: {input_dim}, hidden dimension: {hidden_dim}, layer dimension: {layer_dim}, output dimension: {output_dim}\n")
 logfile.write("\n")
 
@@ -50,9 +51,7 @@ x_test_tensor = Variable(torch.Tensor(x_test)).to(device=device)
 y_train_tensor = Variable(torch.Tensor(y_train))
 y_test_tensor = Variable(torch.Tensor(y_test)).to(device=device)
 
-#incorporate av/max pooling
-
-# max_pool = nn.MaxPool1d(kernel_size=k, stride=k)
+#incorporate av/max pooling before lstm
 avg_pool = nn.AvgPool1d(kernel_size=k, stride=k, count_include_pad=False)
 
 x_train_tensor = x_train_tensor.unsqueeze(1)
@@ -90,11 +89,11 @@ class LSTMModel(nn.Module):
             self.D = 1
 
         # attention layer 
-        self.attention = nn.Linear(window_size*(self.D)*hidden_dim, window_size, bias=True,device=device) 
+        self.attention = nn.Linear(int(window_size/k_2*(self.D)*hidden_dim), int(window_size/k_2), bias=True,device=device) 
             # see eqn 3,4,5 in the paper
 
         # Output layer (linear combination of last outputs)
-        self.fc = nn.Linear(window_size*(self.D)*hidden_dim, output_dim)
+        self.fc = nn.Linear(int(window_size/k_2*(self.D)*hidden_dim), output_dim)
 
 
 
@@ -114,11 +113,13 @@ class LSTMModel(nn.Module):
         # out.size() --> batch_size, seq_dim, hidden_dim
         # out[:, -1, :] --> batch_size, hidden_dim --> extract outputs from last layer
 
-        # TODO need to check on dimensions and sort out the form of the weights & to incorporate requires_grad_()?
-        # if not self.batch_first:
-        #     out_atten = torch.transpose(out, 0, 1)
-        #
-        
+    
+        # incorporate av/max pooling before attention
+        avg_pool_2d = torch.nn.AvgPool2d(kernel_size=(k_2, 1), padding=0, stride=(k_2,1)) 
+        out = out.unsqueeze(1)
+        out = avg_pool_2d(out)
+        out = out.squeeze(1)
+
         softmax = nn.Softmax(dim=-1)
         relu = nn.ReLU()
         attention = softmax(relu(self.attention(out.flatten(start_dim=1,end_dim=-1)))) # attention
