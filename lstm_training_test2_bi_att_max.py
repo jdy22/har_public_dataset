@@ -16,7 +16,7 @@ else:
 print(device)
 # torch.cuda.empty_cache()
 
-logfile = open("BiLSTM_atten_test1.txt", "w")
+logfile = open("BiLSTM_atten_test998.txt", "w")
 
 # Constants/parameters
 k = 4  #kernel size for av/max_pooling
@@ -37,7 +37,7 @@ logfile.write("\n")
 
 # Read in data
 print("Reading in data and converting to tensors...")
-with open("data_test3.pk1", "rb") as file:
+with open("/home/joanna/har_initial_test/data_test3.pk1", "rb") as file:
     data = pickle.load(file)
 x_train = data[0]
 x_test = data[1]
@@ -71,7 +71,7 @@ print("Creating LSTM model, loss function and optimiser...")
 # LSTM model class
 class LSTMModel(nn.Module):
     # def __init__(self, input_dim, hidden_dim, layer_dim, output_dim):
-    def __init__(self, input_dim, hidden_dim, layer_dim, output_dim, batch_first=True, bidirectional=True, use_attention=True): 
+    def __init__(self, input_dim, hidden_dim, layer_dim, output_dim, batch_first=True, bidirectional=True): 
         super(LSTMModel, self).__init__()
         # Number of hidden units
         self.hidden_dim = hidden_dim
@@ -90,10 +90,7 @@ class LSTMModel(nn.Module):
             self.D = 1
 
         # attention layer 
-        self.use_attention = use_attention
-
-        if self.use_attention:
-            self.attention = nn.Linear(window_size*(self.D)*hidden_dim, window_size, bias=True,device=device) 
+        self.attention = nn.Linear(window_size*(self.D)*hidden_dim, window_size, bias=True,device=device) 
             # see eqn 3,4,5 in the paper
 
         # Output layer (linear combination of last outputs)
@@ -121,13 +118,13 @@ class LSTMModel(nn.Module):
         # if not self.batch_first:
         #     out_atten = torch.transpose(out, 0, 1)
         #
-        if self.use_attention:
-            softmax = nn.Softmax(dim=-1)
-            relu = nn.ReLU()
-            attention = softmax(relu(self.attention(out.flatten(start_dim=1,end_dim=-1)))) # attention
-            attention = attention.unsqueeze(-1)
-            attention = attention.repeat(1,1,hidden_dim*self.D) # repeat for each hidden dim
-            out = torch.mul(attention, out) #merge
+        
+        softmax = nn.Softmax(dim=-1)
+        relu = nn.ReLU()
+        attention = softmax(relu(self.attention(out.flatten(start_dim=1,end_dim=-1)))) # attention
+        attention = attention.unsqueeze(-1)
+        attention = attention.repeat(1,1,hidden_dim*self.D) # repeat for each hidden dim
+        out = torch.mul(attention, out) #merge
         out = out.flatten(start_dim=1,end_dim=-1) #flatten layer        
         out = self.fc(out) 
 
@@ -137,7 +134,7 @@ class LSTMModel(nn.Module):
 
         return out
 
-model = LSTMModel(input_dim, hidden_dim, layer_dim, output_dim, use_attention=False) 
+model = LSTMModel(input_dim, hidden_dim, layer_dim, output_dim) 
 loss_function = nn.CrossEntropyLoss()
 optimiser = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
