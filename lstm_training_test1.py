@@ -9,7 +9,7 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 # LSTM model class
 class LSTMModel(nn.Module):
-    def __init__(self, input_dim, hidden_dim, layer_dim, output_dim):
+    def __init__(self, input_dim, hidden_dim, layer_dim, output_dim, device):
         super(LSTMModel, self).__init__()
         # Number of hidden units
         self.hidden_dim = hidden_dim
@@ -22,14 +22,16 @@ class LSTMModel(nn.Module):
         # Output layer (linear combination of last outputs)
         self.fc = nn.Linear(hidden_dim, output_dim)
 
+        self.device = device
+
     def forward(self, x):
         # Initialize hidden state with zeros
         h0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).requires_grad_()
         # Initialize cell state
         c0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).requires_grad_()
 
-        h0 = h0.to(device=device)
-        c0 = c0.to(device=device)
+        h0 = h0.to(device=self.device)
+        c0 = c0.to(device=self.device)
 
         out, (hn, cn) = self.lstm(x, (h0.detach(), c0.detach()))
 
@@ -62,10 +64,8 @@ class Dataset_builder(Dataset):
 
 # Function to train model
 def train_LSTM_model(model, device, n_epochs, train_loader, optimiser, loss_function, x_test_tensor, y_test_tensor):
-    print("Training model...")
     model = model.to(device=device)
     for n_epoch in range(n_epochs):
-        print(f"Starting epoch number {n_epoch+1}")
         for i, (inputs, labels) in enumerate(train_loader):
             # if i%10 == 0:
             #     print(f"{i} batches processed")
@@ -102,7 +102,7 @@ def main():
         device = torch.device('cpu')
     print(device)
 
-    logging = True
+    logging = False
     logfile_name = "LSTM_test15.txt"
 
     if logging:
@@ -141,7 +141,7 @@ def main():
     x_test_tensor = torch.reshape(x_test_tensor, (x_test_tensor.shape[0], window_size, -1))
 
     # Instantiate LSTM model and loss function
-    model = LSTMModel(input_dim, hidden_dim, layer_dim, output_dim)
+    model = LSTMModel(input_dim, hidden_dim, layer_dim, output_dim, device)
     loss_function = nn.CrossEntropyLoss()
     optimiser = torch.optim.Adam(model.parameters(), lr=learning_rate)
 

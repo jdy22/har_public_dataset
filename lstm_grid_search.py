@@ -34,10 +34,10 @@ def main():
     n_folds = 5
 
     # Hyperparameters for grid search
-    batch_sizes = [2, 5, 10, 20, 50, 100, 200] # Used for training
+    batch_sizes = [5, 10, 20, 50, 100, 200] # Used for training
     learning_rates = [0.001, 0.0001, 0.00001]
     no_epochs = [100, 200] # Training epochs
-    hidden_dims = [200, 300]
+    hidden_dims = [200]
 
     if logging:
         logfile.write(f"LSTM grid search\n")
@@ -70,11 +70,12 @@ def main():
         for learning_rate in learning_rates:
             for n_epochs in no_epochs:
                 for hidden_dim in hidden_dims:
+                    print(f"Batch size: {batch_size}, learning rate: {learning_rate}, no. epochs: {n_epochs}, hidden dimension: {hidden_dim}")
                     # Create data loader for batch gradient descent
                     train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, num_workers=2)
 
                     # Instantiate LSTM model and loss function
-                    model = LSTMModel(input_dim, hidden_dim, layer_dim, output_dim)
+                    model = LSTMModel(input_dim, hidden_dim, layer_dim, output_dim, device)
                     loss_function = nn.CrossEntropyLoss()
                     optimiser = torch.optim.Adam(model.parameters(), lr=learning_rate)
 

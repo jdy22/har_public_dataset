@@ -1,0 +1,39 @@
+LSTM grid search
+Window size: 1000, input dimension: 90, layer dimension: 1, output dimension: 7
+
+Batch size: 5, learning rate: 0.001, no. epochs: 100, hidden dimension: 200 - accuracy = 0.39258792996406555
+Batch size: 5, learning rate: 0.001, no. epochs: 200, hidden dimension: 200 - accuracy = 0.29585427045822144
+Batch size: 5, learning rate: 0.0001, no. epochs: 100, hidden dimension: 200 - accuracy = 0.9315326809883118
+Batch size: 5, learning rate: 0.0001, no. epochs: 200, hidden dimension: 200 - accuracy = 0.9535175561904907
+Batch size: 5, learning rate: 1e-05, no. epochs: 100, hidden dimension: 200 - accuracy = 0.7694723606109619
+Batch size: 5, learning rate: 1e-05, no. epochs: 200, hidden dimension: 200 - accuracy = 0.947236180305481
+Batch size: 10, learning rate: 0.001, no. epochs: 100, hidden dimension: 200 - accuracy = 0.4830401837825775
+Batch size: 10, learning rate: 0.001, no. epochs: 200, hidden dimension: 200 - accuracy = 0.43781405687332153
+Batch size: 10, learning rate: 0.0001, no. epochs: 100, hidden dimension: 200 - accuracy = 0.9139447212219238
+Batch size: 10, learning rate: 0.0001, no. epochs: 200, hidden dimension: 200 - accuracy = 0.9202260971069336
+Batch size: 10, learning rate: 1e-05, no. epochs: 100, hidden dimension: 200 - accuracy = 0.7242462038993835
+Batch size: 10, learning rate: 1e-05, no. epochs: 200, hidden dimension: 200 - accuracy = 0.822236180305481
+Batch size: 20, learning rate: 0.001, no. epochs: 100, hidden dimension: 200 - accuracy = 0.5094221234321594
+Batch size: 20, learning rate: 0.001, no. epochs: 200, hidden dimension: 200 - accuracy = 0.5690954923629761
+Batch size: 20, learning rate: 0.0001, no. epochs: 100, hidden dimension: 200 - accuracy = 0.8850502371788025
+Batch size: 20, learning rate: 0.0001, no. epochs: 200, hidden dimension: 200 - accuracy = 0.9453517198562622
+Batch size: 20, learning rate: 1e-05, no. epochs: 100, hidden dimension: 200 - accuracy = 0.7248743772506714
+Batch size: 20, learning rate: 1e-05, no. epochs: 200, hidden dimension: 200 - accuracy = 0.7908291220664978
+Batch size: 50, learning rate: 0.001, no. epochs: 100, hidden dimension: 200 - accuracy = 0.6111809015274048
+Batch size: 50, learning rate: 0.001, no. epochs: 200, hidden dimension: 200 - accuracy = 0.6783919334411621
+Batch size: 50, learning rate: 0.0001, no. epochs: 100, hidden dimension: 200 - accuracy = 0.8473618030548096
+Batch size: 50, learning rate: 0.0001, no. epochs: 200, hidden dimension: 200 - accuracy = 0.9020100235939026
+Batch size: 50, learning rate: 1e-05, no. epochs: 100, hidden dimension: 200 - accuracy = 0.6915829181671143
+Batch size: 50, learning rate: 1e-05, no. epochs: 200, hidden dimension: 200 - accuracy = 0.7650753855705261
+Batch size: 100, learning rate: 0.001, no. epochs: 100, hidden dimension: 200 - accuracy = 0.6564069986343384
+Batch size: 100, learning rate: 0.001, no. epochs: 200, hidden dimension: 200 - accuracy = 0.6865577697753906
+Batch size: 100, learning rate: 0.0001, no. epochs: 100, hidden dimension: 200 - accuracy = 0.820351779460907
+Batch size: 100, learning rate: 0.0001, no. epochs: 200, hidden dimension: 200 - accuracy = 0.9346733689308167
+Batch size: 100, learning rate: 1e-05, no. epochs: 100, hidden dimension: 200 - accuracy = 0.6256281137466431
+Batch size: 100, learning rate: 1e-05, no. epochs: 200, hidden dimension: 200 - accuracy = 0.7148241400718689
+Batch size: 200, learning rate: 0.001, no. epochs: 100, hidden dimension: 200 - accuracy = 0.6984924674034119
+Batch size: 200, learning rate: 0.001, no. epochs: 200, hidden dimension: 200 - accuracy = 0.8247487545013428
+Batch size: 200, learning rate: 0.0001, no. epochs: 100, hidden dimension: 200 - accuracy = 0.7248743772506714
+Batch size: 200, learning rate: 0.0001, no. epochs: 200, hidden dimension: 200 - accuracy = 0.8190954923629761
+Batch size: 200, learning rate: 1e-05, no. epochs: 100, hidden dimension: 200 - accuracy = 0.6017587780952454
+Batch size: 200, learning rate: 1e-05, no. epochs: 200, hidden dimension: 200 - accuracy = 0.6714823842048645
