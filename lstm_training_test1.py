@@ -2,7 +2,6 @@ import numpy as np
 import pickle
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
 from torch.utils.data import DataLoader, Dataset
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
@@ -63,7 +62,7 @@ class Dataset_builder(Dataset):
 
 
 # Function to train model
-def train_LSTM_model(model, device, n_epochs, train_loader, optimiser, loss_function, x_test_tensor, y_test_tensor):
+def train_LSTM_model(model, device, n_epochs, train_loader, optimiser, loss_function, x_test_tensor, y_test_tensor, logging=False, logfile=None):
     model = model.to(device=device)
     for n_epoch in range(n_epochs):
         for i, (inputs, labels) in enumerate(train_loader):
@@ -84,6 +83,8 @@ def train_LSTM_model(model, device, n_epochs, train_loader, optimiser, loss_func
             test_loss = loss_function(predictions, labels)
             accuracy = torch.count_nonzero(torch.argmax(predictions, dim=1)==labels)/len(predictions)
             print(f"Model loss after {n_epoch+1} epochs = {test_loss}, accuracy = {accuracy}")
+            if logging and logfile is not None:
+                logfile.write(f"Model loss after {n_epoch+1} epochs = {test_loss}, accuracy = {accuracy}\n")
 
     cm_labels = ["bed", "fall", "walk", "pickup", "run", "sitdown", "standup"]
     cm = confusion_matrix(labels.cpu(), torch.argmax(predictions, dim=1).cpu(), normalize="true")
@@ -102,19 +103,19 @@ def main():
         device = torch.device('cpu')
     print(device)
 
-    logging = False
-    logfile_name = "LSTM_test15.txt"
+    logging = True
+    logfile_name = "LSTM_final.txt"
 
     if logging:
         logfile = open(logfile_name, "w")
 
     # Constants/parameters
     window_size = 1000 # Used in pre-processing
-    batch_size = 10 # Used for training
+    batch_size = 5 # Used for training
     learning_rate = 0.0001
-    n_epochs = 100 # Training epochs
+    n_epochs = 200 # Training epochs
     input_dim = 90
-    hidden_dim = 300
+    hidden_dim = 200
     layer_dim = 1
     output_dim = 7
 
@@ -132,10 +133,10 @@ def main():
     y_test = data[3]
 
     # Convert to torch tensors, move to GPU and reshape x into sequential data (3D)
-    x_train_tensor = Variable(torch.Tensor(x_train))
-    x_test_tensor = Variable(torch.Tensor(x_test)).to(device=device)
-    y_train_tensor = Variable(torch.Tensor(y_train))
-    y_test_tensor = Variable(torch.Tensor(y_test)).to(device=device)
+    x_train_tensor = torch.Tensor(x_train)
+    x_test_tensor = torch.Tensor(x_test).to(device=device)
+    y_train_tensor = torch.Tensor(y_train)
+    y_test_tensor = torch.Tensor(y_test).to(device=device)
 
     x_train_tensor = torch.reshape(x_train_tensor, (x_train_tensor.shape[0], window_size, -1))
     x_test_tensor = torch.reshape(x_test_tensor, (x_test_tensor.shape[0], window_size, -1))
@@ -150,9 +151,10 @@ def main():
     train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, num_workers=2)
 
     # Train model
-    accuracy, cm = train_LSTM_model(model, device, n_epochs, train_loader, optimiser, loss_function, x_test_tensor, y_test_tensor)
+    accuracy, cm = train_LSTM_model(model, device, n_epochs, train_loader, optimiser, loss_function, x_test_tensor, y_test_tensor, logging, logfile)
 
     if logging:
+        logfile.write(f"\nFinal accuracy = {accuracy}\n")
         logfile.write(f"\nFinal confusion matrix:\n")
         for i in range(len(cm)):
             logfile.write(str(cm[i]))

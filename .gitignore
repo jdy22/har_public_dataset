@@ -2,3 +2,4 @@ Dataset/
 .DS_Store
 input_files/
 *.pk1
+__pycache__/

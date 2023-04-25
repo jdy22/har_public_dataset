@@ -2,7 +2,6 @@ import numpy as np
 import pickle
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
 from torch.utils.data import DataLoader, Dataset
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from numpy.random import default_rng
@@ -72,10 +71,10 @@ def k_fold_cross_val(n_folds, x_train, y_train, device, window_size, input_dim, 
         val_labels = y_train[val_indices,]
 
         # Convert to torch tensors, move to GPU and reshape x into sequential data (3D)
-        x_train_tensor = Variable(torch.Tensor(train_data))
-        x_test_tensor = Variable(torch.Tensor(val_data)).to(device=device)
-        y_train_tensor = Variable(torch.Tensor(train_labels))
-        y_test_tensor = Variable(torch.Tensor(val_labels)).to(device=device)
+        x_train_tensor = torch.Tensor(train_data)
+        x_test_tensor = torch.Tensor(val_data).to(device=device)
+        y_train_tensor = torch.Tensor(train_labels)
+        y_test_tensor = torch.Tensor(val_labels).to(device=device)
 
         x_train_tensor = torch.reshape(x_train_tensor, (x_train_tensor.shape[0], window_size, -1))
         x_test_tensor = torch.reshape(x_test_tensor, (x_test_tensor.shape[0], window_size, -1))
