@@ -1,0 +1,191 @@
+import numpy as np
+import pickle
+import torch
+import torch.nn as nn
+from torch.autograd import Variable
+from torch.utils.data import DataLoader, Dataset
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+
+lr_range = [0.0001, 0.00005]
+bs_range = [5, 10, 20]
+n = 0
+for lr in lr_range:
+    for bs in bs_range:
+        n = n + 1
+        filename = "ABLSTM_test" + str(n)
+        USE_GPU = True
+
+        if USE_GPU and torch.cuda.is_available():
+            device = torch.device('cuda:0')
+        else:
+            device = torch.device('cpu')
+
+        print(device)
+        # torch.cuda.empty_cache()
+
+        logfile = open(filename, "w")
+
+        # Constants/parameters
+        k = 5 #kernel size for av polling before lstm
+        k_2 = 4 # kernel size & stride for av pooling before attention
+        window_size = int(1000/k) # Used in pre-processing
+        batch_size = bs # Used for training
+        learning_rate = lr
+        n_epochs = 300 # Training epochs
+        input_dim = 90
+        hidden_dim = 200
+        layer_dim = 1
+        output_dim = 7
+
+        logfile.write("Bi-LSTM with Attention (av_pooling)\n")
+
+        logfile.write(f"K size: k:{k} and k_2{k_2}, Window sizes: before LSTM:{window_size} and before atten:{int(window_size/k_2)}, batch size: {batch_size}, learning rate: {learning_rate}, epochs: {n_epochs}\n")
+        logfile.write(f"Input dimension: {input_dim}, hidden dimension: {hidden_dim}, layer dimension: {layer_dim}, output dimension: {output_dim}\n")
+        logfile.write("\n")
+
+        # Read in data
+        print("Reading in data and converting to tensors...")
+        with open("/home/joanna/har_initial_test/data_test3.pk1", "rb") as file:
+            data = pickle.load(file)
+        x_train = data[0]
+        x_test = data[1]
+        y_train = data[2]
+        y_test = data[3]
+
+        # Convert to torch tensors, move to GPU and reshape x into sequential data (3D)
+        x_train_tensor = torch.Tensor(x_train)
+        x_test_tensor = torch.Tensor(x_test).to(device=device)
+        y_train_tensor = torch.Tensor(y_train)
+        y_test_tensor = torch.Tensor(y_test).to(device=device)
+
+        # #incorporate av/max pooling before lstm
+        avg_pool = nn.AvgPool1d(kernel_size=k, stride=k, count_include_pad=False)
+
+        x_train_tensor = x_train_tensor.unsqueeze(1)
+        x_train_tensor = avg_pool(x_train_tensor)
+        x_train_tensor = x_train_tensor.squeeze(1)
+        x_train_tensor = torch.reshape(x_train_tensor, (x_train_tensor.shape[0], window_size, -1))
+
+        x_test_tensor = x_test_tensor.unsqueeze(1)
+        x_test_tensor = avg_pool(x_test_tensor)
+        x_test_tensor = x_test_tensor.squeeze(1)
+        x_test_tensor = torch.reshape(x_test_tensor, (x_test_tensor.shape[0], window_size, -1))
+
+        # Instantiate LSTM model and loss function
+        print("Creating LSTM model, loss function and optimiser...")
+
+        # LSTM model class
+        class LSTMModel(nn.Module):
+            # def __init__(self, input_dim, hidden_dim, layer_dim, output_dim):
+            def __init__(self, input_dim, hidden_dim, layer_dim, output_dim, batch_first=True, bidirectional=True): 
+                super(LSTMModel, self).__init__()
+                # Number of hidden units
+                self.hidden_dim = hidden_dim
+                # Number of hidden layers
+                self.layer_dim = layer_dim
+
+                
+                self.lstm = nn.LSTM(input_dim, hidden_dim, layer_dim, batch_first=True, bidirectional=True) 
+                self.batch_first = batch_first
+
+                # bidirectional
+                self.bidirectional = bidirectional
+                if self.bidirectional:
+                    self.D = 2
+                else:
+                    self.D = 1
+
+                # attention layer 
+                self.attention = nn.Linear(int(window_size/k_2*(self.D)*hidden_dim), int((window_size/k_2)**2), bias=True,device=device)         # self.attention = nn.MultiheadAttention(int(hidden_dim*self.D),1, bias=True, batch_first=True, device=device) 
+
+                    # see eqn 3,4,5 in the paper
+
+                # Output layer (linear combination of last outputs)
+                self.fc = nn.Linear(int(window_size/k_2*(self.D)*hidden_dim), output_dim)
+
+                # The outputs of the two directions of the LSTM are concatenated on the last dimension.
+            def forward(self, x):
+                # Initialize hidden state with zeros
+                h0 = torch.zeros(self.layer_dim*self.D, x.size(0), self.hidden_dim).requires_grad_()
+                # Initialize cell state
+                c0 = torch.zeros(self.layer_dim*self.D, x.size(0), self.hidden_dim).requires_grad_()
+
+                h0 = h0.to(device=device)
+                c0 = c0.to(device=device)
+                out, (hn, cn) = self.lstm(x, (h0.detach(), c0.detach()))
+                avg_pool_2d = torch.nn.AvgPool2d(kernel_size=(k_2, 1), padding=0, stride=(k_2,1)) 
+                out = out.unsqueeze(1)
+                out = avg_pool_2d(out)
+                out = out.squeeze(1)
+                softmax = nn.Softmax(dim=-1)
+                relu = nn.ReLU()
+                attention = self.attention(out.flatten(start_dim=1,end_dim=-1)) # attention
+                attention = softmax(relu(attention.reshape(attention.shape[0],int(window_size/k_2),-1)))
+                out = torch.bmm(attention, out) #merge
+                out = out.flatten(start_dim=1,end_dim=-1) #flatten layer        
+                out = self.fc(out)
+
+                # Apply softmax activation to output
+                activation = nn.Softmax(dim=1)
+                out = activation(out)
+
+                return out
+
+        model = LSTMModel(input_dim, hidden_dim, layer_dim, output_dim, bidirectional=True) 
+        loss_function = nn.CrossEntropyLoss()
+        optimiser = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+        # Create data loader for batch gradient descent
+        print("Creating data loader for batches...")
+
+        # Dataset builder class
+        class Dataset_builder(Dataset):
+            def __init__(self, x, y):
+                self.x = x
+                self.y = y
+                self.len = x.shape[0]        
+            # Getting the data
+            def __getitem__(self, index):    
+                return self.x[index], self.y[index]    
+            # Getting length of the data
+            def __len__(self):
+                return self.len
+
+        train_dataset = Dataset_builder(x_train_tensor, y_train_tensor)
+        train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, num_workers=5)
+
+        # Train model
+        print("Training model...")
+        model = model.to(device=device)
+        for n_epoch in range(n_epochs):
+            print(f"Starting epoch number {n_epoch+1}")
+            for i, (inputs, labels) in enumerate(train_loader):
+                # if i%10 == 0:
+                #     print(f"{i} batches processed")
+                inputs = inputs.to(device=device)
+                labels = labels.to(device=device)
+                optimiser.zero_grad()
+                outputs = model(inputs)
+                labels = torch.argmax(labels, dim=1)
+                loss = loss_function(outputs, labels)
+                loss.backward()
+                optimiser.step()
+                
+            with torch.no_grad():
+                predictions = model(x_test_tensor)
+                labels = torch.argmax(y_test_tensor, dim=1)
+                test_loss = loss_function(predictions, labels)
+                accuracy = torch.count_nonzero(torch.argmax(predictions, dim=1)==labels)/len(predictions)
+                print(f"Model loss after {n_epoch+1} epochs = {test_loss}, accuracy = {accuracy}")
+                logfile.write(f"Model loss after {n_epoch+1} epochs = {test_loss}, accuracy = {accuracy}\n")
+
+        cm_labels = ["bed", "fall", "walk", "pickup", "run", "sitdown", "standup"]
+        cm = confusion_matrix(labels.cpu(), torch.argmax(predictions, dim=1).cpu(), normalize="true")
+        print("Confusion matrix:")
+        print(cm)
+        logfile.write(f"\nFinal confusion matrix:\n")
+        for i in range(len(cm)):
+            logfile.write(f"{str(cm[i])}\n")
+                
+        logfile.close()
+

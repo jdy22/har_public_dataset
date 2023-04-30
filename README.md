@@ -20,6 +20,7 @@ To run the raw data preprocessing on the public dataset, run the following pytho
 The "lstm_training_test1.py" file will train the LSTM model on the public dataset. The best hyperparameter settings have been saved in this file. The test loss and accuracy per epoch, as well as the final accuracy and confusion matrix will be printed to the terminal. If "logging" in line 106 is set to "True", this information will also be saved to the text file specified in line 107.
 
 ### ABLSTM:
+The "ablstm_training_test1.py" file will train the ABLSTM model on the public dataset. The best hyperparameter settings have been saved in this file. The test loss and accuracy per epoch, as well as the final accuracy and confusion matrix will be printed to the terminal. If "logging" in line 106 is set to "True", this information will also be saved to the text file specified in line 107.
 
 ## Hyperparameter Tuning:
 
@@ -28,6 +29,7 @@ The "lstm_training_test1.py" file will train the LSTM model on the public datase
 The "lstm_grid_search.py" file will run a grid search on the hyperparameter settings for the LSTM model on the public dataset. Results will be printed to the terminal. If "logging" in line 22 is set to "True", this information will also be saved to the text file specified in line 23.
 
 ### ABLSTM:
+Within the "ablstm_training_test1.py" file different combination of parameters values were experimented to find the optimal hyperparameter settings for ABLSTM model on the public data set. You may use the "for loop" to automate the grid search. Results will be printed to the terminal. Results are also logged to textfile specified in line 26, by default.
 
 ## Archives:
 Old code files and logs have been stored in the archives folder of this repository for record-purposes.
