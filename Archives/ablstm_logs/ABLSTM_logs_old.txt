@@ -323,7 +323,7 @@ Final confusion matrix:
 
 
 Bi-LSTM with Attention (av_pooling)
-K size: k:5 and k_24, Window sizes: before LSTM: 200 and before atten: 50, batch size: 10, learning rate: 0.0001, epochs: 300
+K size: k:5 and k_24, Window sizes: before LSTM: 200 and before atten: 50, batch size: 20, learning rate: 0.0001, epochs: 300
 Input dimension: 90, hidden dimension: 200, layer dimension: 1, output dimension: 7
 
 Model loss after 183 epochs = 1.322507381439209, accuracy = 0.8422110676765442
@@ -580,7 +580,7 @@ Confusion matrix:
 
 
 Bi-LSTM with Attention (av_pooling)
-K size: k:5 and k_24, Window sizes: before LSTM: 200 and before atten: 50, batch size: 20, learning rate: 0.0001, epochs: 300
+K size: k:5 and k_24, Window sizes: before LSTM: 200 and before atten: 50, batch size: 5, learning rate: 0.00005, epochs: 300
 Input dimension: 90, hidden dimension: 200, layer dimension: 1, output dimension: 7
 
 cuda:0
@@ -1210,7 +1210,7 @@ Confusion matrix:
 
 
 Bi-LSTM with Attention (av_pooling)
-K size: k:5 and k_24, Window sizes: before LSTM: 200 and before atten: 50, batch size: 5, learning rate: 0.00005, epochs: 300
+K size: k:5 and k_24, Window sizes: before LSTM: 200 and before atten: 50, batch size: 10, learning rate: 0.00005, epochs: 300
 Input dimension: 90, hidden dimension: 200, layer dimension: 1, output dimension: 7
 
 cuda:0
@@ -1837,7 +1837,7 @@ Confusion matrix:
 
 
 Bi-LSTM with Attention (av_pooling)
-K size: k:5 and k_24, Window sizes: before LSTM: 200 and before atten: 50, batch size: 10, learning rate: 0.00005, epochs: 300
+K size: k:5 and k_24, Window sizes: before LSTM: 200 and before atten: 50, batch size: 20, learning rate: 0.00005, epochs: 300
 Input dimension: 90, hidden dimension: 200, layer dimension: 1, output dimension: 7
 
 cuda:0
@@ -2463,7 +2463,7 @@ Confusion matrix:
 
 
 Bi-LSTM with Attention (av_pooling)
-K size: k:5 and k_24, Window sizes: before LSTM:200 and before atten:50, batch size: 20, learning rate: 0.00005, epochs: 300
+K size: k:5 and k_24, Window sizes: before LSTM:200 and before atten:50, batch size: 5, learning rate: 0.00001, epochs: 300
 Input dimension: 90, hidden dimension: 200, layer dimension: 1, output dimension: 7
 
 Starting epoch number 1

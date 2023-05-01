@@ -6,7 +6,7 @@ from torch.autograd import Variable
 from torch.utils.data import DataLoader, Dataset
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
-lr_range = [0.0001, 0.00005]
+lr_range = [0.00001, 0.00005, 0.0001]
 bs_range = [5, 10, 20]
 n = 0
 for lr in lr_range:
@@ -36,6 +36,7 @@ for lr in lr_range:
         hidden_dim = 200
         layer_dim = 1
         output_dim = 7
+        print(f"K size: k:{k} and k_2{k_2}, Window sizes: before LSTM:{window_size} and before atten:{int(window_size/k_2)}, batch size: {batch_size}, learning rate: {learning_rate}, epochs: {n_epochs}")
 
         logfile.write("Bi-LSTM with Attention (av_pooling)\n")
 
